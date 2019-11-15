@@ -342,12 +342,20 @@ shinyServer(function(input, output, session){
   taxa <- reactive({
     input$assign_tax
     isolate(validate(need(filt_file_path() != " ", 
-                          message = "Filtered fastq file folder required")))
+                  message = "Filtered fastq file folder required")))
     isolate(validate(need(file.exists(paste0(filt_file_path(), "/seqmat.RDS")),
                           message = "seqmat.RDS file not found")))
     # Check that the selected ref file exists or a chosen file is uploaded
-    if(input$ref_seq == "upload"){
-      isolate(validate(need(input$ref_seq_file, message = "Reference does not exist")))
+    if(input$ref_seq == "silva"){
+      isolate(validate(need(file.exists("./www/silva_nr_v132_train_set.fa.gz"),
+                            message = "Selected reference does not exist")))
+    }
+    else if(input$ref_seq == "gg"){
+      isolate(validate(need(file.exists("./www/gg_13_8_train_set_97.fa.gz"),
+                            message = "Selected reference does not exist")))
+    }
+    else if(input$ref_seq == "upload"){
+      isolate(validate(need(input$ref_seq_file, message = "reference does not exist")))
     }
     isolate(assign_taxonomy(input, output, filt_file_path, file_path))
   })
@@ -365,9 +373,17 @@ shinyServer(function(input, output, session){
     isolate(validate(need(file.exists(paste0(filt_file_path(), "/seqmat.RDS")),
                           message = "seqmat.RDS file not found")))
     # Check that the selected ref file exists or that a chosen file is uploaded
-    if(input$ref_species == "upload"){
+    if(input$ref_species == "silva"){
+      isolate(validate(need(file.exists("./www/silva_nr_v132_train_set.fa.gz"),
+                            message = "Selected reference does not exist")))
+    }
+    else if(input$ref_species == "rdp"){
+      isolate(validate(need(file.exists("./www/rdp_species_assignment_14.fa.gz"),
+                            message = "Selected reference does not exist")))
+    }
+    else if(input$ref_species == "upload"){
       isolate(validate(need(input$ref_species_file,
-                            message = "Reference does not exist")))
+                            message = "reference does not exist")))
     }
     if(file.exists(paste0(filt_file_path(), "/taxa.RDS"))){
       taxa <- readRDS(paste0(filt_file_path(), "/taxa.RDS"))
