@@ -895,7 +895,16 @@ assign_taxonomy <- function(input, output, filt_file_path, file_path){
   # get the file from dada: /seqmat.RDS. Should be in same FT directory
   seqtab_nochim_path <- paste0(filt_file_path(), "/seqmat.RDS")
   seqtab_nochim <- readRDS(seqtab_nochim_path)
-  if(!is.null(input$ref_seq_file) && input$ref_seq == "upload"){
+  # Get which reference to use (rn we only have silva data, might change later)
+  if(input$ref_seq == "silva"){
+    taxa <- assignTaxonomy(seqtab_nochim,
+        "./www/silva_nr_v132_train_set.fa.gz", multithread=TRUE)
+  }
+  else if(input$ref_seq == "gg"){
+    taxa <- assignTaxonomy(seqtab_nochim,
+        "./www/gg_13_8_train_set_97.fa.gz", multithread=TRUE)
+  }
+  else if(!is.null(input$ref_seq_file) && input$ref_seq == "upload"){
     path <- input$ref_seq_file
     taxa <- assignTaxonomy(seqtab_nochim, path$datapath)
   }
@@ -903,7 +912,7 @@ assign_taxonomy <- function(input, output, filt_file_path, file_path){
     validate(need(input$ref_seq != "none", input$ref_seq_file,
                   message = "No reference selected"))
   }
-  # save the object as rds in the filtered folder dir
+    # save the object as rds in the filtered folder dir
   saveRDS(taxa, paste0(filt_file_path(), "/taxa.RDS"))
   return(taxa)
 }
@@ -911,7 +920,14 @@ assign_taxonomy <- function(input, output, filt_file_path, file_path){
 assign_species <- function(input, output, filt_file_path, taxa, file_path){
   seqtab_nochim_path <- paste0(filt_file_path(), "/seqmat.RDS")
   seqtab_nochim <- readRDS(seqtab_nochim_path)
-  if(!is.null(input$ref_species_file) && input$ref_species == "upload"){
+  # Get which reference to use (rn we only have silva data, might change later)
+  if(input$ref_species == "silva"){
+    taxa <- addSpecies(taxa, "./www/silva_species_assignment_v132.fa.gz")
+  }
+  if(input$ref_species == "rdp"){
+    taxa <- addSpecies(taxa, "./www/rdp_species_assignment_14.fa.gz")
+  }
+  else if(!is.null(input$ref_species_file) && input$ref_species == "upload"){
     path <- input$ref_species_file
     taxa <- addSpecies(taxa, path$datapath)
   }
